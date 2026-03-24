@@ -2,9 +2,12 @@ from ultralytics import YOLO
 import cv2
 from pathlib import Path
 
+# ⭐ Load trained model
 model = YOLO("../models/best.pt")
 
+# ⭐ Video path
 video_path = Path(__file__).resolve().parents[1] / "assets" / "sample_videos" / "test.mp4"
+
 cap = cv2.VideoCapture(str(video_path))
 
 if not cap.isOpened():
@@ -18,25 +21,25 @@ while True:
 
     h, w, _ = frame.shape
 
-    # ⭐ ROI — adjust based on your video
-    roi = frame[int(h*0.3):h, int(w*0.4):w]
+    # ⭐ ROI (wider area = better detection)
+    roi = frame[int(h*0.2):h, int(w*0.3):w]
 
-    # ⭐ TRACKING ON ROI
-    results = model.track(
+    # ⭐ DETECTION (not tracking)
+    results = model.predict(
         roi,
-        persist=True,
-        conf=0.05,
-        imgsz=960
+        conf=0.25,        # Lower = detect more objects
+        imgsz=1280,       # Higher = better small-object detection
+        device="cpu"
     )
 
     annotated_roi = results[0].plot()
 
-    # ⭐ Put ROI back into original frame
-    frame[int(h*0.3):h, int(w*0.4):w] = annotated_roi
+    # ⭐ Put ROI back into frame
+    frame[int(h*0.2):h, int(w*0.3):w] = annotated_roi
 
-    cv2.imshow("Tyre Tracking", frame)
+    cv2.imshow("Tyre Detection", frame)
 
-    if cv2.waitKey(30) & 0xFF == ord("q"):
+    if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
 cap.release()

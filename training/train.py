@@ -1,11 +1,12 @@
 from ultralytics import YOLO
 
-model = YOLO('yolov8s.pt')
+model = YOLO('yolov8n.pt')
 
 model.train(
     data='training/data.yaml',
-    epochs=80,
-    imgsz=1280,
-    batch=4,
+    epochs=70,          
+    imgsz=640,
+    batch=8,
+    patience=15,        
     name='tyre_detector_desert'
 )

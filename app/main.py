@@ -1,6 +1,9 @@
 import streamlit as st
+import cv2
+from ultralytics import YOLO
+from pathlib import Path
 
-# Page settings
+# ================= PAGE SETTINGS =================
 st.set_page_config(
     page_title="VisionGuard AI",
     page_icon="🛡️",
@@ -17,81 +20,96 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ===== HEADER =====
+# ================= LOAD MODEL =================
+@st.cache_resource
+def load_model():
+    model_path = Path(__file__).resolve().parents[1] / "models" / "best.pt"
+    return YOLO(str(model_path))
+
+model = load_model()
+
+# ================= VIDEO PATHS =================
+base_path = Path(__file__).resolve().parents[1] / "assets" / "sample_videos"
+
+video_options = {
+    "Desert Scenario": base_path / "test.mp4",
+    "Mountain Scenario": base_path / "test2.mp4"
+}
+
+# ================= HEADER =================
 st.title("🛡️ VisionGuard AI")
 st.subheader("Universal Video Intelligence System")
 
 st.markdown(
     """
-    Detect and analyze objects in videos using AI.
+    Detect and analyze objects in videos using AI.  
     This demo focuses on **tyre detection in real-world conditions**.
     """
 )
 
 st.divider()
 
-# ===== SIDEBAR =====
+# ================= SIDEBAR =================
 st.sidebar.header("Settings")
 
-confidence = st.sidebar.slider(
-    "Confidence Threshold",
-    min_value=0.1,
-    max_value=1.0,
-    value=0.5,
-    step=0.05
+confidence = 0.45
+
+selected_video_name = st.sidebar.selectbox(
+    "Select Scenario",
+    list(video_options.keys())
 )
 
-st.sidebar.info(
-    "Adjust detection sensitivity."
-)
+video_path = video_options[selected_video_name]
 
-# ===== MAIN LAYOUT =====
+# ================= LAYOUT =================
 col1, col2 = st.columns([1, 1])
 
-# LEFT — Upload Section
+# ========= LEFT — ORIGINAL VIDEO =========
 with col1:
-    st.header("📤 Upload Video")
+    st.header("📤 Original Video")
 
-    uploaded_file = st.file_uploader(
-        "Choose a video file",
-        type=["mp4", "avi", "mov"]
-    )
+    st.video(str(video_path))
 
-    if uploaded_file is not None:
-        st.success("Video uploaded successfully!")
-
-        st.write("File name:", uploaded_file.name)
-        st.write("File size:", round(uploaded_file.size / (1024*1024), 2), "MB")
-
-        st.video(uploaded_file)
-
-# RIGHT — Output Section
+# ========= RIGHT — DETECTION OUTPUT =========
 with col2:
     st.header("Detection Output")
 
-    st.info(
-        "Detection results will appear here after processing."
-    )
+    run_button = st.button("▶ Run Detection")
 
-    st.empty()  # Placeholder for future output
+    if run_button:
+
+        cap = cv2.VideoCapture(str(video_path))
+        stframe = st.empty()
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            results = model(frame, conf=confidence)
+
+            annotated_frame = results[0].plot()
+
+            stframe.image(
+                annotated_frame,
+                channels="BGR",
+                use_container_width=True
+            )
+
+        cap.release()
 
 st.divider()
 
-# ===== PROJECT INFO =====
+# ================= INFO =================
 st.header("📊 System Information")
 
-info_col1, info_col2, info_col3 = st.columns(3)
+c1, c2, c3 = st.columns(3)
 
-with info_col1:
-    st.metric("Model", "YOLOv8")
+c1.metric("Model", "YOLOv8")
+c2.metric("Task", "Object Detection")
+c3.metric("Target", "Tyre")
 
-with info_col2:
-    st.metric("Task", "Object Detection")
-
-with info_col3:
-    st.metric("Target", "Tyre")
-
-# ===== FOOTER =====
+# ================= FOOTER =================
 st.markdown(
     """
     ---
