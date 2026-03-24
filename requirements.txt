@@ -1,3 +1,4 @@
+--no-cache-dir
 numpy==1.26.4
 ultralytics==8.4.24
 streamlit==1.55.0
