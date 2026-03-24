@@ -1,6 +1,5 @@
---no-cache-dir
-numpy==1.26.4
-ultralytics==8.4.24
 streamlit==1.55.0
-opencv-python-headless==4.8.1.78
+ultralytics==8.4.24
+numpy==1.26.4
 pillow==12.1.1
+opencv-python-headless==4.8.1.78
