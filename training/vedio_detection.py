@@ -18,10 +18,10 @@ while True:
 
     h, w, _ = frame.shape
 
-    # ⭐ ROI — adjust based on your video
+    # ROI — adjust based on your video
     roi = frame[int(h*0.3):h, int(w*0.4):w]
 
-    # ⭐ TRACKING ON ROI
+    # Tracking on ROI
     results = model.track(
         roi,
         persist=True,
@@ -31,10 +31,10 @@ while True:
 
     annotated_roi = results[0].plot()
 
-    # ⭐ Put ROI back into original frame
+    # Put ROI back into original frame
     frame[int(h*0.3):h, int(w*0.4):w] = annotated_roi
 
-    # ⭐ FIX BLUE ISSUE — convert for display only
+    # Fix Blue Issue — convert for display only
     display_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     cv2.imshow("Tyre Tracking", display_frame)

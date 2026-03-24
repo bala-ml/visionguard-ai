@@ -3,7 +3,6 @@ import cv2
 from ultralytics import YOLO
 from pathlib import Path
 
-# ================= PAGE SETTINGS =================
 st.set_page_config(
     page_title="VisionGuard AI",
     page_icon="🛡️",
@@ -20,7 +19,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ================= LOAD MODEL =================
 @st.cache_resource
 def load_model():
     model_path = Path(__file__).resolve().parents[1] / "models" / "best.pt"
@@ -28,7 +26,6 @@ def load_model():
 
 model = load_model()
 
-# ================= VIDEO PATHS =================
 base_path = Path(__file__).resolve().parents[1] / "assets" / "sample_videos"
 
 video_options = {
@@ -36,7 +33,6 @@ video_options = {
     "Mountain Scenario": base_path / "test2.mp4"
 }
 
-# ================= HEADER =================
 st.title("🛡️ VisionGuard AI")
 st.subheader("Universal Video Intelligence System")
 
@@ -49,7 +45,6 @@ st.markdown(
 
 st.divider()
 
-# ================= SIDEBAR =================
 st.sidebar.header("Settings")
 
 confidence = 0.45
@@ -61,16 +56,13 @@ selected_video_name = st.sidebar.selectbox(
 
 video_path = video_options[selected_video_name]
 
-# ================= LAYOUT =================
 col1, col2 = st.columns([1, 1])
 
-# ========= LEFT — ORIGINAL VIDEO =========
 with col1:
     st.header("📤 Original Video")
 
     st.video(str(video_path))
 
-# ========= RIGHT — DETECTION OUTPUT =========
 with col2:
     st.header("Detection Output")
 
@@ -100,7 +92,7 @@ with col2:
 
 st.divider()
 
-# ================= INFO =================
+# Info
 st.header("📊 System Information")
 
 c1, c2, c3 = st.columns(3)
@@ -109,7 +101,6 @@ c1.metric("Model", "YOLOv8")
 c2.metric("Task", "Object Detection")
 c3.metric("Target", "Tyre")
 
-# ================= FOOTER =================
 st.markdown(
     """
     ---

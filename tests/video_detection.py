@@ -2,10 +2,8 @@ from ultralytics import YOLO
 import cv2
 from pathlib import Path
 
-# ⭐ Load trained model
 model = YOLO("../models/best.pt")
 
-# ⭐ Video path
 video_path = Path(__file__).resolve().parents[1] / "assets" / "sample_videos" / "test.mp4"
 
 cap = cv2.VideoCapture(str(video_path))
@@ -21,20 +19,17 @@ while True:
 
     h, w, _ = frame.shape
 
-    # ⭐ ROI (wider area = better detection)
     roi = frame[int(h*0.2):h, int(w*0.3):w]
 
-    # ⭐ DETECTION (not tracking)
     results = model.predict(
         roi,
-        conf=0.25,        # Lower = detect more objects
-        imgsz=1280,       # Higher = better small-object detection
+        conf=0.25,     
+        imgsz=1280,       
         device="cpu"
     )
 
     annotated_roi = results[0].plot()
 
-    # ⭐ Put ROI back into frame
     frame[int(h*0.2):h, int(w*0.3):w] = annotated_roi
 
     cv2.imshow("Tyre Detection", frame)
