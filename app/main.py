@@ -1,5 +1,6 @@
 import streamlit as st
 import imageio
+from ultralytics import YOLO
 from pathlib import Path
 import numpy as np
 
