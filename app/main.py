@@ -1,20 +1,13 @@
-import os
-import sys
 import streamlit as st
-os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
-os.environ["DISPLAY"] = ":0"
-import cv2 as cv2_headless
-sys.modules['cv2'] = cv2_headless
+import imageio
 from ultralytics import YOLO
 from pathlib import Path
+import numpy as np
 
-st.set_page_config(
-    page_title="VisionGuard AI",
-    page_icon="🛡️",
-    layout="wide"
-)
+st.set_page_config(page_title="VisionGuard AI", page_icon="🛡️", layout="wide")
 
-st.markdown("""
+st.markdown(
+    """
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -22,12 +15,16 @@ st.markdown("""
     font-family: 'Poppins', sans-serif !important;
 }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
 
 @st.cache_resource
 def load_model():
     model_path = Path(__file__).resolve().parents[1] / "models" / "best.pt"
     return YOLO(str(model_path))
+
 
 model = load_model()
 
@@ -35,7 +32,7 @@ base_path = Path(__file__).resolve().parents[1] / "assets" / "sample_videos"
 
 video_options = {
     "Desert Scenario": base_path / "test.mp4",
-    "Mountain Scenario": base_path / "test2.mp4"
+    "Mountain Scenario": base_path / "test2.mp4",
 }
 
 st.title("🛡️ VisionGuard AI")
@@ -55,8 +52,7 @@ st.sidebar.header("Settings")
 confidence = 0.45
 
 selected_video_name = st.sidebar.selectbox(
-    "Select Scenario",
-    list(video_options.keys())
+    "Select Scenario", list(video_options.keys())
 )
 
 video_path = video_options[selected_video_name]
@@ -75,25 +71,36 @@ with col2:
 
     if run_button:
 
-        cap = cv2.VideoCapture(str(video_path))
+        # cap = cv2.VideoCapture(str(video_path))
+        # stframe = st.empty()
+
+        # while cap.isOpened():
+        #     ret, frame = cap.read()
+        #     if not ret:
+        #         break
+
+        #     results = model(frame, conf=confidence)
+
+        #     annotated_frame = results[0].plot()
+
+        #     stframe.image(
+        #         annotated_frame,
+        #         channels="BGR",
+        #         use_container_width=True
+        #     )
+
+        # cap.release()
+
+        reader = imageio.get_reader(str(video_path))
         stframe = st.empty()
 
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
+        for frame in reader:
+            frame = np.array(frame)
 
             results = model(frame, conf=confidence)
-
             annotated_frame = results[0].plot()
 
-            stframe.image(
-                annotated_frame,
-                channels="BGR",
-                use_container_width=True
-            )
-
-        cap.release()
+            stframe.image(annotated_frame, use_container_width=True)
 
 st.divider()
 
