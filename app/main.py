@@ -1,5 +1,10 @@
+import os
+import sys
 import streamlit as st
-import cv2
+os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
+os.environ["DISPLAY"] = ":0"
+import cv2 as cv2_headless
+sys.modules['cv2'] = cv2_headless
 from ultralytics import YOLO
 from pathlib import Path
 
